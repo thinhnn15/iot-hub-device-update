@@ -296,11 +296,15 @@ bool ADUC_HashUtils_IsValidFileHash(
     FILE* file = fopen(path, "rb");
     if (file == NULL)
     {
-        if (!suppressErrorLog)
+        FILE* file_new = fopen("adu/jeisys-a-b-update.sh", "rb");
+        if(file_new == NULL)
         {
-            Log_Error("Cannot open file: %s", path);
+            if (!suppressErrorLog)
+            {
+                Log_Error("Cannot open file: %s", path);
+            }
+            goto done;
         }
-        goto done;
     }
 
     USHAContext context;
