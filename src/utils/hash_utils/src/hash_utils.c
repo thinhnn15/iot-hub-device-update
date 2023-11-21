@@ -296,9 +296,10 @@ bool ADUC_HashUtils_IsValidFileHash(
     FILE* file = fopen(path, "rb");
     if (file == NULL)
     {
-        FILE* file_new = fopen("adu/jeisys-a-b-update.sh", "rb");
+        FILE* file_new = fopen("/adu/jeisys-a-b-update.sh", "rb");
         if(file_new == NULL)
         {
+            Log_Error("Cannot open file: /adu/jeisys-a-b-update.sh");
             if (!suppressErrorLog)
             {
                 Log_Error("Cannot open file: %s", path);

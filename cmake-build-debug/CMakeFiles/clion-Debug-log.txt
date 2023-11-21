@@ -1,4 +1,4 @@
-/snap/clion/250/bin/cmake/linux/x64/bin/cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_MAKE_PROGRAM=/snap/clion/250/bin/ninja/linux/x64/ninja -G Ninja -S /home/thinh/Documents/iot-hub-device-update -B /home/thinh/Documents/iot-hub-device-update/cmake-build-debug
+/snap/clion/250/bin/cmake/linux/x64/bin/cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_MAKE_PROGRAM=/snap/clion/250/bin/ninja/linux/x64/ninja -G Ninja -S /home/thinh/Pictures/sources/iot-hub-device-update -B /home/thinh/Pictures/sources/iot-hub-device-update/cmake-build-debug
 -- The C compiler identification is GNU 11.4.0
 -- The CXX compiler identification is GNU 11.4.0
 -- Detecting C compiler ABI info
@@ -19,13 +19,13 @@
 -- CMAKE_BUILD_TYPE=Debug
 -- CMAKE_C_COMPILER=/usr/bin/cc
 -- CMAKE_CXX_COMPILER=/usr/bin/c++
--- CMAKE_BINARY_DIR=/home/thinh/Documents/iot-hub-device-update/cmake-build-debug
--- CMAKE_SOURCE_DIR=/home/thinh/Documents/iot-hub-device-update
+-- CMAKE_BINARY_DIR=/home/thinh/Pictures/sources/iot-hub-device-update/cmake-build-debug
+-- CMAKE_SOURCE_DIR=/home/thinh/Pictures/sources/iot-hub-device-update
 -- CMAKE_BUILD_TYPE=Debug
 -- CMAKE_SYSTEM_NAME=Linux
 -- 
-Overwriting file at /home/thinh/Documents/iot-hub-device-update/src/inc/aduc/result.h
-Generating result.h file at: /home/thinh/Documents/iot-hub-device-update/src/inc/aduc/result.h
+Overwriting file at /home/thinh/Pictures/sources/iot-hub-device-update/src/inc/aduc/result.h
+Generating result.h file at: /home/thinh/Pictures/sources/iot-hub-device-update/src/inc/aduc/result.h
 Parsing JSON file...
 Generating result.h file...
 CMake Error at src/adu-shell/CMakeLists.txt:45 (find_package):
