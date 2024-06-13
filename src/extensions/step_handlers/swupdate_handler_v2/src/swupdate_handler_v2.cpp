@@ -56,6 +56,7 @@ SWUpdateHandlerImpl::~SWUpdateHandlerImpl() // override
 {
     ADUC_Logging_Uninit();
 }
+// JEISYS-CHANGE: START
 // Create a function to write log to /adu/adu-jeisys.log
 void WriteLog(const char* log)
 {
@@ -81,6 +82,99 @@ void WriteLog(const char* log)
     fprintf(file, "%s\n", log);
     fclose(file);
 }
+
+bool IsSwuFile(const char* fileName)
+{
+    // Check if the file is a .swu file
+    if (strstr(fileName, ".swu") != NULL)
+    {
+        return true;
+    }
+    return false;
+}
+bool IsNewVersion(const char* currentVersion, const char* newVersion)
+{
+    // Compare the version
+    if (strcmp(currentVersion, newVersion) < 0)
+    {
+        return true;
+    }
+    return false;
+}
+bool ValidateNewFw()
+{
+    // Get all file in /var/lib/adu/downloads/ and subfolder
+    char* path = "/var/lib/adu/downloads/";
+    DIR* dir;
+    struct dirent* ent;
+    if ((dir = opendir(path)) != NULL)
+    {
+        while ((ent = readdir(dir)) != NULL)
+        {
+            // Check if the file is a .json file
+            if (strstr(ent->d_name, ".json") != NULL)
+            {
+                // Read the content of the file
+                char* filePath = (char*)malloc(strlen(path) + strlen(ent->d_name) + 1);
+                sprintf(filePath, "%s%s", path, ent->d_name);
+                FILE* file = fopen(filePath, "r");
+                if (file == NULL)
+                {
+                    return false;
+                }
+                fseek(file, 0, SEEK_END);
+                long fileSize = ftell(file);
+                fseek(file, 0, SEEK_SET);
+                char* fileContent = (char*)malloc(fileSize + 1);
+                fread(fileContent, 1, fileSize, file);
+                fclose(file);
+                fileContent[fileSize] = 0;
+                // Parse the content of the file
+                JSON_Value* rootValue = json_parse_string(fileContent);
+                if (rootValue == NULL)
+                {
+                    return false;
+                }
+                JSON_Object* rootObject = json_value_get_object(rootValue);
+                // Get updateId object
+                JSON_Object* updateIdObject = json_object_get_object(rootObject, "updateId");
+                if (updateIdObject == NULL)
+                {
+                    return false;
+                }
+                // Get version from updateId object
+                const char* version = json_object_get_string(updateIdObject, "version");
+                if (version == NULL)
+                {
+                    return false;
+                }
+                // Get current version of the device
+                char* currentVersion = (char*)malloc(100);
+                FILE* versionFile = fopen("/etc/adu-version", "r");
+                if (versionFile == NULL)
+                {
+                    return false;
+                }
+                fgets(currentVersion, 100, versionFile);
+                fclose(versionFile);
+                // Compare the version
+                if (IsNewVersion(currentVersion, version))
+                {
+                    return true;
+                }
+            }
+        }
+        closedir(dir);
+    }
+    else
+    {
+        // Could not open directory
+        return false;
+    }
+}
+
+// JEISYS-CHANGE: END
+
 /**
  * @brief Downloads a main script file into a sandbox folder.
  *        The 'handlerProperties["scriptFileName"]' contains the main script file name.
@@ -91,7 +185,7 @@ void WriteLog(const char* log)
 static ADUC_Result SWUpdate_Handler_DownloadScriptFile(ADUC_WorkflowHandle handle)
 {
     // Write log to /adu/adu-jeisys.log
-    WriteLog("SWUpdate_Handler_DownloadScriptFile START");
+    WriteLog("SWUpdate_Handler_DownloadScriptFile START");      // JEISYS-CHANGE
     ADUC_Result result = { ADUC_Result_Failure };
     char* workFolder = nullptr;
     ADUC_FileEntity* entity = nullptr;
@@ -142,7 +236,8 @@ static ADUC_Result SWUpdate_Handler_DownloadScriptFile(ADUC_WorkflowHandle handl
     entity = nullptr;
 
 done:
-    WriteLog("SWUpdate_Handler_DownloadScriptFile END");
+
+    WriteLog("SWUpdate_Handler_DownloadScriptFile END");        // JEISYS-CHANGE
     workflow_free_string(workFolder);
     return result;
 }
@@ -319,7 +414,7 @@ ContentHandler* SWUpdateHandlerImpl::CreateContentHandler()
 ADUC_Result SWUpdateHandlerImpl::Download(const tagADUC_WorkflowData* workflowData)
 {
     Log_Info("SWUpdate handler v2 download task begin.");
-    WriteLog("SWUpdate handler v2 download task begin.");
+    WriteLog("SWUpdate handler v2 download task begin.");       // JEISYS-CHANGE
 
     ADUC_WorkflowHandle workflowHandle = workflowData->WorkflowHandle;
     char* installedCriteria = nullptr;
@@ -355,7 +450,19 @@ ADUC_Result SWUpdateHandlerImpl::Download(const tagADUC_WorkflowData* workflowDa
                        .ExtendedResultCode = ADUC_ERC_SWUPDATE_HANDLER_DOWNLOAD_FAILURE_GET_PAYLOAD_FILE_ENTITY };
             goto done;
         }
-
+        // JEISYS-CHANGE: START
+        // Check if the file is a .swu file
+        const char* fileName = workflow_get_file_name(entity);
+        if (IsSwuFile(fileName))
+        {
+            if(!ValidateNewFw())
+            {
+                result = { .ResultCode = ADUC_Result_Failure,
+                           .ExtendedResultCode = ADUC_ERC_SWUPDATE_HANDLER_DOWNLOAD_FAILURE_GET_PAYLOAD_FILE_ENTITY };
+                goto done;
+            }
+        }
+        // JEISYS-CHANGE: END
         try
         {
             result = ExtensionManager::Download(
@@ -386,7 +493,7 @@ done:
     workflow_free_file_entity(entity);
     workflow_free_string(installedCriteria);
     Log_Info("SWUpdate_Handler download task end.");
-    WriteLog("SWUpdate_Handler download task end.");
+    WriteLog("SWUpdate_Handler download task end.");        // JEISYS-CHANGE
     return result;
 }
 
