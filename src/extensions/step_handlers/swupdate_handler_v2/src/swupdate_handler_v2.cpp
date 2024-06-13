@@ -30,7 +30,7 @@
 #include <string>
 
 #include <parson.h>
-
+#include <dirent.h>
 #define HANDLER_PROPERTIES_SCRIPT_FILENAME "scriptFileName"
 #define HANDLER_PROPERTIES_SWU_FILENAME "swuFileName"
 
