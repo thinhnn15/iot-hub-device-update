@@ -56,7 +56,31 @@ SWUpdateHandlerImpl::~SWUpdateHandlerImpl() // override
 {
     ADUC_Logging_Uninit();
 }
+// Create a function to write log to /adu/adu-jeisys.log
+void WriteLog(const char* log)
+{
+    // Add the ===JEISYS-DEBUG=== prefix to log
+    char* logWithPrefix = (char*)malloc(strlen("===JEISYS-DEBUG=== ") + strlen(log) + 1);
+    sprintf(logWithPrefix, "===JEISYS-DEBUG=== %s", log);
 
+    // Get the current time, save the file by date
+    time_t now = time(0);
+    struct tm tstruct;
+    tstruct = *localtime(&now);
+    char date[80];
+    strftime(date, sizeof(date), "%Y-%m-%d", &tstruct);
+    // Create name of file with date
+    char* logFileName = (char*)malloc(strlen("/adu/adu-jeisys-") + strlen(date) + strlen(".log") + 1);
+    sprintf(logFileName, "/adu/adu-jeisys-%s.log", date);
+
+    // Check the file is exist or not, if not create the file
+    FILE* file = fopen(logFileName, "a");
+    if (file == NULL)
+        file = fopen("/adu/adu-jeisys.log", "w");
+    // Write log to file
+    fprintf(file, "%s\n", log);
+    fclose(file);
+}
 /**
  * @brief Downloads a main script file into a sandbox folder.
  *        The 'handlerProperties["scriptFileName"]' contains the main script file name.
@@ -66,6 +90,8 @@ SWUpdateHandlerImpl::~SWUpdateHandlerImpl() // override
  */
 static ADUC_Result SWUpdate_Handler_DownloadScriptFile(ADUC_WorkflowHandle handle)
 {
+    // Write log to /adu/adu-jeisys.log
+    WriteLog("SWUpdate_Handler_DownloadScriptFile START");
     ADUC_Result result = { ADUC_Result_Failure };
     char* workFolder = nullptr;
     ADUC_FileEntity* entity = nullptr;
@@ -116,6 +142,7 @@ static ADUC_Result SWUpdate_Handler_DownloadScriptFile(ADUC_WorkflowHandle handl
     entity = nullptr;
 
 done:
+    WriteLog("SWUpdate_Handler_DownloadScriptFile END");
     workflow_free_string(workFolder);
     return result;
 }
@@ -292,6 +319,7 @@ ContentHandler* SWUpdateHandlerImpl::CreateContentHandler()
 ADUC_Result SWUpdateHandlerImpl::Download(const tagADUC_WorkflowData* workflowData)
 {
     Log_Info("SWUpdate handler v2 download task begin.");
+    WriteLog("SWUpdate handler v2 download task begin.");
 
     ADUC_WorkflowHandle workflowHandle = workflowData->WorkflowHandle;
     char* installedCriteria = nullptr;
@@ -358,6 +386,7 @@ done:
     workflow_free_file_entity(entity);
     workflow_free_string(installedCriteria);
     Log_Info("SWUpdate_Handler download task end.");
+    WriteLog("SWUpdate_Handler download task end.");
     return result;
 }
 
