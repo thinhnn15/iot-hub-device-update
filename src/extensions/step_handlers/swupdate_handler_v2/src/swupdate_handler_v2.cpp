@@ -451,8 +451,8 @@ ADUC_Result SWUpdateHandlerImpl::Download(const tagADUC_WorkflowData* workflowDa
             goto done;
         }
         // JEISYS-CHANGE: START
-        // Check if the file is a .swu file
-        const char* fileName = workflow_get_file_name(entity);
+        // Get file name from TargetFilename of entity
+        const char* fileName = entity->TargetFilename;
         if (IsSwuFile(fileName))
         {
             if(!ValidateNewFw())
