@@ -60,9 +60,13 @@ SWUpdateHandlerImpl::~SWUpdateHandlerImpl() // override
 // Create a function to write log to /adu/adu-jeisys.log
 void WriteLog(const char* log)
 {
+    // Add end of line to log
+    char* logWithEndOfLine = (char*)malloc(strlen(log) + 2);
+    sprintf(logWithEndOfLine, "%s\n", log);
+
     // Add the ===JEISYS-DEBUG=== prefix to log
-    char* logWithPrefix = (char*)malloc(strlen("===JEISYS-DEBUG=== ") + strlen(log) + 1);
-    sprintf(logWithPrefix, "===JEISYS-DEBUG=== %s", log);
+    char* logWithPrefix = (char*)malloc(strlen("===JEISYS-DEBUG=== ") + strlen(logWithEndOfLine) + 1);
+    sprintf(logWithPrefix, "===JEISYS-DEBUG=== %s", logWithEndOfLine);
 
     // Get the current time, save the file by date
     time_t now = time(0);
@@ -77,9 +81,9 @@ void WriteLog(const char* log)
     // Check the file is exist or not, if not create the file
     FILE* file = fopen(logFileName, "a");
     if (file == NULL)
-        file = fopen("/adu/adu-jeisys.log", "w");
+        file = fopen(logFileName, "w");
     // Write log to file
-    fprintf(file, "%s\n", log);
+    fprintf(file, "%s", logWithPrefix);
     fclose(file);
 }
 
@@ -88,6 +92,8 @@ bool IsSwuFile(const char* fileName)
     // Check if the file is a .swu file
     if (strstr(fileName, ".swu") != NULL)
     {
+        // Write log to /adu/adu-jeisys.log
+        WriteLog("IsSwuFile: true");
         return true;
     }
     return false;
@@ -97,8 +103,12 @@ bool IsNewVersion(const char* currentVersion, const char* newVersion)
     // Compare the version
     if (strcmp(currentVersion, newVersion) < 0)
     {
+        // Write log to /adu/adu-jeisys.log
+        WriteLog("IsNewVersion: true");
         return true;
     }
+    // Write log to /adu/adu-jeisys.log
+    WriteLog("IsNewVersion: false");
     return false;
 }
 bool ValidateNewFw()
