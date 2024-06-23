@@ -119,6 +119,7 @@ bool IsNewVersion(const char* currentVersion, const char* newVersion)
 }
 bool ValidateNewFw(const char* fileName)
 {
+    WriteLog("ValidateNewFw");
     // Get current version of the device
     char* currentVersion = (char*)malloc(100);
     FILE* versionFile = fopen("/etc/adu-version", "r");
@@ -137,8 +138,20 @@ bool ValidateNewFw(const char* fileName)
     // Remove the .swu extension
     char* version = (char*)malloc(strlen(fileName) - 4);
     strncpy(version, fileName, strlen(fileName) - 4);
-    // Only get len size characters from end of the string
-    version[len] = 0;
+    // Get the prefix name of the file, the template of file is text[version].swu
+    // Find the first number in the file name
+    int i = 0;
+    while (i < len && !isdigit(version[i]))
+    {
+        i++;
+    }
+    // Remove the prefix name of the file
+    char* versionFile = (char*)malloc(len - i);
+    strncpy(versionFile, version + i, len - i);
+    // Get the version of the file
+    char* version = (char*)malloc(len - i);
+    strncpy(version, versionFile, len - i);
+    // Write log to /adu/adu-jeisys.log
     WriteLog(version);
     // The version are end of the string characters, the length of version is len of versionFile
     // Compare the version
