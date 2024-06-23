@@ -135,6 +135,7 @@ bool ValidateNewFw(const char* fileName)
     char* newVersion = (char*)malloc(strlen(fileName) - 4);
     strncpy(newVersion, fileName, strlen(fileName) - 4);
     newVersion[strlen(fileName) - 4] = '\0';
+    WriteLog(newVersion);
     // Remove the beginning of the file name until number character
     char* newVersionNumber = (char*)malloc(strlen(newVersion));
     int i = 0;
@@ -143,6 +144,7 @@ bool ValidateNewFw(const char* fileName)
         i++;
     }
     strcpy(newVersionNumber, newVersion + i);
+    WriteLog(newVersionNumber);
     // Compare the version
     if (IsNewVersion(currentVersion, newVersionNumber))
     {
