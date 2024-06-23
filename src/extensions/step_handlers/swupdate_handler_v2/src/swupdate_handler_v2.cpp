@@ -119,7 +119,6 @@ bool IsNewVersion(const char* currentVersion, const char* newVersion)
 }
 bool ValidateNewFw()
 {
-    return true;       // TNN-TODO: Remove this line later
     // Get all file in /var/lib/adu/downloads/ and subfolder
     char* path = "/var/lib/adu/downloads/";
     DIR* dir;
@@ -491,7 +490,7 @@ ADUC_Result SWUpdateHandlerImpl::Download(const tagADUC_WorkflowData* workflowDa
             if(!ValidateNewFw())
             {
                 WriteLog("ValidateNewFw: false");
-                goto done;
+                // goto done;
             }
         }
         // JEISYS-CHANGE: END
