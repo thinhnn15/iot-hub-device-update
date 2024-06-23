@@ -162,7 +162,7 @@ bool ValidateNewFw(const char* fileName)
     // Write log to /adu/adu-jeisys.log
     WriteLog(newVersion);
     
-    if (IsNewVersion(currentVersion, version))
+    if (IsNewVersion(currentVersion, newVersion))
     {
         // Write log to /adu/adu-jeisys.log
         WriteLog("ValidateNewFw: true");
