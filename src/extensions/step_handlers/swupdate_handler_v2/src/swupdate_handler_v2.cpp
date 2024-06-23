@@ -119,7 +119,7 @@ bool IsNewVersion(const char* currentVersion, const char* newVersion)
 }
 bool ValidateNewFw()
 {
-    return false;       // TNN-TODO: Remove this line later
+    return true;       // TNN-TODO: Remove this line later
     // Get all file in /var/lib/adu/downloads/ and subfolder
     char* path = "/var/lib/adu/downloads/";
     DIR* dir;
