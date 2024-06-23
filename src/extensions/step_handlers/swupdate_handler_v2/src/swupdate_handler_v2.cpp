@@ -483,16 +483,17 @@ ADUC_Result SWUpdateHandlerImpl::Download(const tagADUC_WorkflowData* workflowDa
         }
         // JEISYS-CHANGE: START
         // Get file name from TargetFilename of entity
-        // const char* fileName = entity->TargetFilename;
-        // if (IsSwuFile(fileName))
-        // {
-        //     if(!ValidateNewFw())
-        //     {
-        //         result = { .ResultCode = ADUC_Result_Failure,
-        //                    .ExtendedResultCode = ADUC_ERC_SWUPDATE_HANDLER_DOWNLOAD_FAILURE_GET_PAYLOAD_FILE_ENTITY };
-        //         goto done;
-        //     }
-        // }
+        const char* fileName = entity->TargetFilename;
+        WriteLog(fileName);
+        if (IsSwuFile(fileName))
+        {
+            // if(!ValidateNewFw())
+            // {
+            //     result = { .ResultCode = ADUC_Result_Failure,
+            //                .ExtendedResultCode = ADUC_ERC_SWUPDATE_HANDLER_DOWNLOAD_FAILURE_GET_PAYLOAD_FILE_ENTITY };
+            //     goto done;
+            // }
+        }
         // JEISYS-CHANGE: END
         try
         {
