@@ -132,29 +132,36 @@ bool ValidateNewFw(const char* fileName)
     fgets(currentVersion, 100, versionFile);
     fclose(versionFile);
 
-    // Process the file name
-    // Get length of version text
-    int len = strlen(fileName);
-    // Remove the .swu extension
-    char* version = (char*)malloc(strlen(fileName) - 4);
-    strncpy(version, fileName, strlen(fileName) - 4);
-    // Get the prefix name of the file, the template of file is text[version].swu
-    // Find the first number in the file name
-    int i = 0;
-    while (i < len && !isdigit(version[i]))
+    // Get new version from file name
+    // Find the first number in the file name and remove the character before number
+    char* newVersion = (char*)malloc(100);
+    char* temp = (char*)malloc(100);
+    strcpy(temp, fileName);
+    char* p = temp;
+    while (*p)
     {
-        i++;
+        if (isdigit(*p))
+        {
+            break;
+        }
+        p++;
     }
-    // Remove the prefix name of the file
-    char* versionFile = (char*)malloc(len - i);
-    strncpy(versionFile, version + i, len - i);
-    // Get the version of the file
-    char* version = (char*)malloc(len - i);
-    strncpy(version, versionFile, len - i);
+    strcpy(newVersion, p);
+
+    // Remove the .swu extension
+    char* p2 = newVersion;
+    while (*p2)
+    {
+        if (*p2 == '.')
+        {
+            *p2 = '\0';
+            break;
+        }
+        p2++;
+    }
     // Write log to /adu/adu-jeisys.log
-    WriteLog(version);
-    // The version are end of the string characters, the length of version is len of versionFile
-    // Compare the version
+    WriteLog(newVersion);
+    
     if (IsNewVersion(currentVersion, version))
     {
         // Write log to /adu/adu-jeisys.log
