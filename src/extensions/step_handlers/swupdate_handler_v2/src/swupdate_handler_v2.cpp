@@ -125,8 +125,10 @@ bool ValidateNewFw()
     struct dirent* ent;
     if ((dir = opendir(path)) != NULL)
     {
+        WriteLog("Open directory");
         while ((ent = readdir(dir)) != NULL)
         {
+            WriteLog(ent->d_name);
             // Check if the file is a .json file
             if (strstr(ent->d_name, ".json") != NULL)
             {
@@ -186,6 +188,7 @@ bool ValidateNewFw()
                 }
             }
         }
+        WriteLog("Close directory");
         closedir(dir);
     }
     else
