@@ -134,9 +134,6 @@ bool ValidateNewFw(const char* fileName)
     // Process the file name
     // Get length of version text
     int len = strlen(fileName);
-    // Remove the end of line character
-    if (fileName[len - 1] == '\n')
-        fileName[len - 1] = 0;
     // Remove the .swu extension
     char* version = (char*)malloc(strlen(fileName) - 4);
     strncpy(version, fileName, strlen(fileName) - 4);
