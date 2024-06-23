@@ -490,8 +490,7 @@ ADUC_Result SWUpdateHandlerImpl::Download(const tagADUC_WorkflowData* workflowDa
         {
             if(!ValidateNewFw())
             {
-                result = { .ResultCode = ADUC_Result_Failure,
-                           .ExtendedResultCode = ADUC_ERC_SWUPDATE_HANDLER_DOWNLOAD_FAILURE_GET_PAYLOAD_FILE_ENTITY };
+                WriteLog("ValidateNewFw: false");
                 goto done;
             }
         }
