@@ -119,6 +119,7 @@ bool IsNewVersion(const char* currentVersion, const char* newVersion)
 }
 bool ValidateNewFw()
 {
+    return false;       // TNN-TODO: Remove this line later
     // Get all file in /var/lib/adu/downloads/ and subfolder
     char* path = "/var/lib/adu/downloads/";
     DIR* dir;
@@ -487,12 +488,12 @@ ADUC_Result SWUpdateHandlerImpl::Download(const tagADUC_WorkflowData* workflowDa
         WriteLog(fileName);
         if (IsSwuFile(fileName))
         {
-            // if(!ValidateNewFw())
-            // {
-            //     result = { .ResultCode = ADUC_Result_Failure,
-            //                .ExtendedResultCode = ADUC_ERC_SWUPDATE_HANDLER_DOWNLOAD_FAILURE_GET_PAYLOAD_FILE_ENTITY };
-            //     goto done;
-            // }
+            if(!ValidateNewFw())
+            {
+                result = { .ResultCode = ADUC_Result_Failure,
+                           .ExtendedResultCode = ADUC_ERC_SWUPDATE_HANDLER_DOWNLOAD_FAILURE_GET_PAYLOAD_FILE_ENTITY };
+                goto done;
+            }
         }
         // JEISYS-CHANGE: END
         try
