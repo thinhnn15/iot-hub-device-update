@@ -449,8 +449,15 @@ ADUC_Result SWUpdateHandlerImpl::Download(const tagADUC_WorkflowData* workflowDa
         {
             if(!ValidateNewFw(fileName))
             {
+                workflow_free_string(workFolder);
                 WriteLog("ValidateNewFw: false");
-                // goto done;
+                workflow_free_file_entity(entity);
+                workflow_free_string(installedCriteria);
+                Log_Info("SWUpdate_Handler download task end.");
+                // WriteLog("SWUpdate_Handler download task end.");        // JEISYS-CHANGE
+                result = { .ResultCode = ADUC_Result_Failure,
+                           .ExtendedResultCode = ADUC_ERC_SWUPDATE_HANDLER_DOWNLOAD_FAILURE_WRONG_UPDATE_VERSION };
+                return result;
             }
         }
         // JEISYS-CHANGE: END
