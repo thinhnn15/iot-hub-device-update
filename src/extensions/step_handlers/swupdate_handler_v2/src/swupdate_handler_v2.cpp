@@ -133,10 +133,25 @@ bool ValidateNewFw(const char* fileName)
     fclose(versionFile);
 
     // Get new version from file name
+    // Remove .swu extension
+    char* p3 = (char*)malloc(100);
+    strcpy(p3, fileName);
+    while (*p3)
+    {
+        if (*p3 == '.')
+        {
+            *p3 = '\0';
+            break;
+        }
+        p3++;
+    }
+    // Write log to /adu/adu-jeisys.log
+    WriteLog(p3);
     // Find the first number in the file name and remove the character before number
     char* newVersion = (char*)malloc(100);
     char* temp = (char*)malloc(100);
-    strcpy(temp, fileName);
+    strcpy(temp, p3);
+    WriteLog(temp);
     char* p = temp;
     while (*p)
     {
@@ -147,18 +162,6 @@ bool ValidateNewFw(const char* fileName)
         p++;
     }
     strcpy(newVersion, p);
-
-    // Remove the .swu extension
-    char* p2 = newVersion;
-    while (*p2)
-    {
-        if (*p2 == '.')
-        {
-            *p2 = '\0';
-            break;
-        }
-        p2++;
-    }
     // Write log to /adu/adu-jeisys.log
     WriteLog(newVersion);
     
