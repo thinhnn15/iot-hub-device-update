@@ -82,8 +82,14 @@ void WriteLog(const char* log)
     FILE* file = fopen(logFileName, "a");
     if (file == NULL)
         file = fopen(logFileName, "w");
+    // Add current time to log
+    char time[80];
+    strftime(time, sizeof(time), "%Y-%m-%d %X", &tstruct);
+    char* logWithTime = (char*)malloc(strlen(time) + strlen(logWithPrefix) + 1);
+    sprintf(logWithTime, "%s %s", time, logWithPrefix);
+
     // Write log to file
-    fprintf(file, "%s", logWithPrefix);
+    fprintf(file, "%s", logWithTime);
     fclose(file);
 }
 
@@ -130,6 +136,7 @@ bool ValidateNewFw()
                 FILE* file = fopen(filePath, "r");
                 if (file == NULL)
                 {
+                    WriteLog("Could not open file");
                     return false;
                 }
                 fseek(file, 0, SEEK_END);
@@ -143,6 +150,7 @@ bool ValidateNewFw()
                 JSON_Value* rootValue = json_parse_string(fileContent);
                 if (rootValue == NULL)
                 {
+                    WriteLog("Could not parse json");
                     return false;
                 }
                 JSON_Object* rootObject = json_value_get_object(rootValue);
@@ -150,12 +158,14 @@ bool ValidateNewFw()
                 JSON_Object* updateIdObject = json_object_get_object(rootObject, "updateId");
                 if (updateIdObject == NULL)
                 {
+                    WriteLog("Could not get updateId object");
                     return false;
                 }
                 // Get version from updateId object
                 const char* version = json_object_get_string(updateIdObject, "version");
                 if (version == NULL)
                 {
+                    WriteLog("Could not get version");
                     return false;
                 }
                 // Get current version of the device
@@ -163,6 +173,7 @@ bool ValidateNewFw()
                 FILE* versionFile = fopen("/etc/adu-version", "r");
                 if (versionFile == NULL)
                 {
+                    WriteLog("Could not open version file");
                     return false;
                 }
                 fgets(currentVersion, 100, versionFile);
@@ -170,6 +181,7 @@ bool ValidateNewFw()
                 // Compare the version
                 if (IsNewVersion(currentVersion, version))
                 {
+                    WriteLog("ValidateNewFw: true");
                     return true;
                 }
             }
@@ -179,8 +191,11 @@ bool ValidateNewFw()
     else
     {
         // Could not open directory
+        WriteLog("Could not open directory");
         return false;
     }
+    WriteLog("ValidateNewFw: false");
+    return false;
 }
 
 // JEISYS-CHANGE: END
@@ -208,18 +223,21 @@ static ADUC_Result SWUpdate_Handler_DownloadScriptFile(ADUC_WorkflowHandle handl
     {
         result.ResultCode = ADUC_Result_Failure;
         result.ExtendedResultCode = ADUC_ERC_SWUPDATE_HANDLER_MISSING_SCRIPT_FILE_NAME;
+        WriteLog("SWUpdate_Handler_DownloadScriptFile ADUC_ERC_SWUPDATE_HANDLER_MISSING_SCRIPT_FILE_NAME");        // JEISYS-CHANGE
         goto done;
     }
 
     if (fileCount <= 1)
     {
         result.ExtendedResultCode = ADUC_ERC_SWUPDATE_HANDLER_DOWNLOAD_FAILURE_WRONG_FILECOUNT;
+        WriteLog("SWUpdate_Handler_DownloadScriptFile ADUC_ERC_SWUPDATE_HANDLER_DOWNLOAD_FAILURE_WRONG_FILECOUNT");        // JEISYS-CHANGE
         goto done;
     }
 
     if (!workflow_get_update_file_by_name(handle, scriptFileName, &entity))
     {
         result.ExtendedResultCode = ADUC_ERC_SWUPDATE_HANDLER_DOWNLOAD_FAILURE_GET_SCRIPT_FILE_ENTITY;
+        WriteLog("SWUpdate_Handler_DownloadScriptFile ADUC_ERC_SWUPDATE_HANDLER_DOWNLOAD_FAILURE_GET_SCRIPT_FILE_ENTITY");        // JEISYS-CHANGE
         goto done;
     }
 
@@ -230,15 +248,18 @@ static ADUC_Result SWUpdate_Handler_DownloadScriptFile(ADUC_WorkflowHandle handl
     {
         Log_Error("Unable to create folder %s, error %d", workFolder, createResult);
         result = { ADUC_Result_Failure, ADUC_ERC_SWUPDATE_HANDLER_CREATE_SANDBOX_FAILURE };
+        WriteLog("SWUpdate_Handler_DownloadScriptFile ADUC_ERC_SWUPDATE_HANDLER_CREATE_SANDBOX_FAILURE");        // JEISYS-CHANGE
         goto done;
     }
 
     try
     {
+        WriteLog("SWUpdate_Handler_DownloadScriptFile Download");        // JEISYS-CHANGE
         result = ExtensionManager::Download(entity, handle, &Default_ExtensionManager_Download_Options, nullptr);
     }
     catch (...)
     {
+        WriteLog("SWUpdate_Handler_DownloadScriptFile Download UnknownException");        // JEISYS-CHANGE
         result.ExtendedResultCode = ADUC_ERC_SWUPDATE_HANDLER_DOWNLOAD_PRIMARY_FILE_FAILURE_UNKNOWNEXCEPTION;
     }
 
@@ -475,8 +496,10 @@ ADUC_Result SWUpdateHandlerImpl::Download(const tagADUC_WorkflowData* workflowDa
         // JEISYS-CHANGE: END
         try
         {
+            WriteLog("SWUpdate_Handler Download START");        // JEISYS-CHANGE
             result = ExtensionManager::Download(
                 entity, workflowHandle, &Default_ExtensionManager_Download_Options, nullptr);
+            WriteLog("SWUpdate_Handler Download END");        // JEISYS-CHANGE
         }
         catch (...)
         {
@@ -490,13 +513,15 @@ ADUC_Result SWUpdateHandlerImpl::Download(const tagADUC_WorkflowData* workflowDa
 
         if (IsAducResultCodeFailure(result.ResultCode))
         {
+            WriteLog("Cannot download payload file");        // JEISYS-CHANGE
             Log_Error("Cannot download payload file#%d. (0x%X)", i, result.ExtendedResultCode);
             goto done;
         }
     }
-
+    WriteLog("SWUpdate_Handler download task end.");        // JEISYS-CHANGE
     // Invoke primary script to download additional files, if required.
     result = PerformAction("--action-download", workflowData);
+    WriteLog("PerformAction --action-download task end.");  // JEISYS-CHANGE
 
 done:
     workflow_free_string(workFolder);
