@@ -210,7 +210,7 @@ bool ValidateNewFw()
 static ADUC_Result SWUpdate_Handler_DownloadScriptFile(ADUC_WorkflowHandle handle)
 {
     // Write log to /adu/adu-jeisys.log
-    WriteLog("SWUpdate_Handler_DownloadScriptFile START");      // JEISYS-CHANGE
+    // WriteLog("SWUpdate_Handler_DownloadScriptFile START");      // JEISYS-CHANGE
     ADUC_Result result = { ADUC_Result_Failure };
     char* workFolder = nullptr;
     ADUC_FileEntity* entity = nullptr;
@@ -223,21 +223,21 @@ static ADUC_Result SWUpdate_Handler_DownloadScriptFile(ADUC_WorkflowHandle handl
     {
         result.ResultCode = ADUC_Result_Failure;
         result.ExtendedResultCode = ADUC_ERC_SWUPDATE_HANDLER_MISSING_SCRIPT_FILE_NAME;
-        WriteLog("SWUpdate_Handler_DownloadScriptFile ADUC_ERC_SWUPDATE_HANDLER_MISSING_SCRIPT_FILE_NAME");        // JEISYS-CHANGE
+        // WriteLog("SWUpdate_Handler_DownloadScriptFile ADUC_ERC_SWUPDATE_HANDLER_MISSING_SCRIPT_FILE_NAME");        // JEISYS-CHANGE
         goto done;
     }
 
     if (fileCount <= 1)
     {
         result.ExtendedResultCode = ADUC_ERC_SWUPDATE_HANDLER_DOWNLOAD_FAILURE_WRONG_FILECOUNT;
-        WriteLog("SWUpdate_Handler_DownloadScriptFile ADUC_ERC_SWUPDATE_HANDLER_DOWNLOAD_FAILURE_WRONG_FILECOUNT");        // JEISYS-CHANGE
+        // WriteLog("SWUpdate_Handler_DownloadScriptFile ADUC_ERC_SWUPDATE_HANDLER_DOWNLOAD_FAILURE_WRONG_FILECOUNT");        // JEISYS-CHANGE
         goto done;
     }
 
     if (!workflow_get_update_file_by_name(handle, scriptFileName, &entity))
     {
         result.ExtendedResultCode = ADUC_ERC_SWUPDATE_HANDLER_DOWNLOAD_FAILURE_GET_SCRIPT_FILE_ENTITY;
-        WriteLog("SWUpdate_Handler_DownloadScriptFile ADUC_ERC_SWUPDATE_HANDLER_DOWNLOAD_FAILURE_GET_SCRIPT_FILE_ENTITY");        // JEISYS-CHANGE
+        // WriteLog("SWUpdate_Handler_DownloadScriptFile ADUC_ERC_SWUPDATE_HANDLER_DOWNLOAD_FAILURE_GET_SCRIPT_FILE_ENTITY");        // JEISYS-CHANGE
         goto done;
     }
 
@@ -248,18 +248,18 @@ static ADUC_Result SWUpdate_Handler_DownloadScriptFile(ADUC_WorkflowHandle handl
     {
         Log_Error("Unable to create folder %s, error %d", workFolder, createResult);
         result = { ADUC_Result_Failure, ADUC_ERC_SWUPDATE_HANDLER_CREATE_SANDBOX_FAILURE };
-        WriteLog("SWUpdate_Handler_DownloadScriptFile ADUC_ERC_SWUPDATE_HANDLER_CREATE_SANDBOX_FAILURE");        // JEISYS-CHANGE
+        // WriteLog("SWUpdate_Handler_DownloadScriptFile ADUC_ERC_SWUPDATE_HANDLER_CREATE_SANDBOX_FAILURE");        // JEISYS-CHANGE
         goto done;
     }
 
     try
     {
-        WriteLog("SWUpdate_Handler_DownloadScriptFile Download");        // JEISYS-CHANGE
+        // WriteLog("SWUpdate_Handler_DownloadScriptFile Download");        // JEISYS-CHANGE
         result = ExtensionManager::Download(entity, handle, &Default_ExtensionManager_Download_Options, nullptr);
     }
     catch (...)
     {
-        WriteLog("SWUpdate_Handler_DownloadScriptFile Download UnknownException");        // JEISYS-CHANGE
+        // WriteLog("SWUpdate_Handler_DownloadScriptFile Download UnknownException");        // JEISYS-CHANGE
         result.ExtendedResultCode = ADUC_ERC_SWUPDATE_HANDLER_DOWNLOAD_PRIMARY_FILE_FAILURE_UNKNOWNEXCEPTION;
     }
 
@@ -268,7 +268,7 @@ static ADUC_Result SWUpdate_Handler_DownloadScriptFile(ADUC_WorkflowHandle handl
 
 done:
 
-    WriteLog("SWUpdate_Handler_DownloadScriptFile END");        // JEISYS-CHANGE
+    // WriteLog("SWUpdate_Handler_DownloadScriptFile END");        // JEISYS-CHANGE
     workflow_free_string(workFolder);
     return result;
 }
@@ -445,7 +445,7 @@ ContentHandler* SWUpdateHandlerImpl::CreateContentHandler()
 ADUC_Result SWUpdateHandlerImpl::Download(const tagADUC_WorkflowData* workflowData)
 {
     Log_Info("SWUpdate handler v2 download task begin.");
-    WriteLog("SWUpdate handler v2 download task begin.");       // JEISYS-CHANGE
+    // WriteLog("SWUpdate handler v2 download task begin.");       // JEISYS-CHANGE
 
     ADUC_WorkflowHandle workflowHandle = workflowData->WorkflowHandle;
     char* installedCriteria = nullptr;
@@ -483,23 +483,23 @@ ADUC_Result SWUpdateHandlerImpl::Download(const tagADUC_WorkflowData* workflowDa
         }
         // JEISYS-CHANGE: START
         // Get file name from TargetFilename of entity
-        const char* fileName = entity->TargetFilename;
-        if (IsSwuFile(fileName))
-        {
-            if(!ValidateNewFw())
-            {
-                result = { .ResultCode = ADUC_Result_Failure,
-                           .ExtendedResultCode = ADUC_ERC_SWUPDATE_HANDLER_DOWNLOAD_FAILURE_GET_PAYLOAD_FILE_ENTITY };
-                goto done;
-            }
-        }
+        // const char* fileName = entity->TargetFilename;
+        // if (IsSwuFile(fileName))
+        // {
+        //     if(!ValidateNewFw())
+        //     {
+        //         result = { .ResultCode = ADUC_Result_Failure,
+        //                    .ExtendedResultCode = ADUC_ERC_SWUPDATE_HANDLER_DOWNLOAD_FAILURE_GET_PAYLOAD_FILE_ENTITY };
+        //         goto done;
+        //     }
+        // }
         // JEISYS-CHANGE: END
         try
         {
-            WriteLog("SWUpdate_Handler Download START");        // JEISYS-CHANGE
+            // WriteLog("SWUpdate_Handler Download START");        // JEISYS-CHANGE
             result = ExtensionManager::Download(
                 entity, workflowHandle, &Default_ExtensionManager_Download_Options, nullptr);
-            WriteLog("SWUpdate_Handler Download END");        // JEISYS-CHANGE
+            // WriteLog("SWUpdate_Handler Download END");        // JEISYS-CHANGE
         }
         catch (...)
         {
@@ -513,22 +513,22 @@ ADUC_Result SWUpdateHandlerImpl::Download(const tagADUC_WorkflowData* workflowDa
 
         if (IsAducResultCodeFailure(result.ResultCode))
         {
-            WriteLog("Cannot download payload file");        // JEISYS-CHANGE
+            // WriteLog("Cannot download payload file");        // JEISYS-CHANGE
             Log_Error("Cannot download payload file#%d. (0x%X)", i, result.ExtendedResultCode);
             goto done;
         }
     }
-    WriteLog("SWUpdate_Handler download task end.");        // JEISYS-CHANGE
+    // WriteLog("SWUpdate_Handler download task end.");        // JEISYS-CHANGE
     // Invoke primary script to download additional files, if required.
     result = PerformAction("--action-download", workflowData);
-    WriteLog("PerformAction --action-download task end.");  // JEISYS-CHANGE
+    // WriteLog("PerformAction --action-download task end.");  // JEISYS-CHANGE
 
 done:
     workflow_free_string(workFolder);
     workflow_free_file_entity(entity);
     workflow_free_string(installedCriteria);
     Log_Info("SWUpdate_Handler download task end.");
-    WriteLog("SWUpdate_Handler download task end.");        // JEISYS-CHANGE
+    // WriteLog("SWUpdate_Handler download task end.");        // JEISYS-CHANGE
     return result;
 }
 
