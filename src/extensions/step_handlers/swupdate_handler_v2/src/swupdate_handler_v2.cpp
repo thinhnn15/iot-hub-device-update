@@ -117,86 +117,42 @@ bool IsNewVersion(const char* currentVersion, const char* newVersion)
     WriteLog("IsNewVersion: false");
     return false;
 }
-bool ValidateNewFw()
+bool ValidateNewFw(const char* fileName)
 {
-    // Get all file in /var/lib/adu/downloads/ and subfolder
-    char* path = "/var/lib/adu/downloads/";
-    DIR* dir;
-    struct dirent* ent;
-    if ((dir = opendir(path)) != NULL)
+    // Get current version of the device
+    char* currentVersion = (char*)malloc(100);
+    FILE* versionFile = fopen("/etc/adu-version", "r");
+    if (versionFile == NULL)
     {
-        WriteLog("Open directory");
-        while ((ent = readdir(dir)) != NULL)
-        {
-            WriteLog(ent->d_name);
-            // Check if the file is a .json file
-            if (strstr(ent->d_name, ".json") != NULL)
-            {
-                // Read the content of the file
-                char* filePath = (char*)malloc(strlen(path) + strlen(ent->d_name) + 1);
-                sprintf(filePath, "%s%s", path, ent->d_name);
-                FILE* file = fopen(filePath, "r");
-                if (file == NULL)
-                {
-                    WriteLog("Could not open file");
-                    return false;
-                }
-                fseek(file, 0, SEEK_END);
-                long fileSize = ftell(file);
-                fseek(file, 0, SEEK_SET);
-                char* fileContent = (char*)malloc(fileSize + 1);
-                fread(fileContent, 1, fileSize, file);
-                fclose(file);
-                fileContent[fileSize] = 0;
-                // Parse the content of the file
-                JSON_Value* rootValue = json_parse_string(fileContent);
-                if (rootValue == NULL)
-                {
-                    WriteLog("Could not parse json");
-                    return false;
-                }
-                JSON_Object* rootObject = json_value_get_object(rootValue);
-                // Get updateId object
-                JSON_Object* updateIdObject = json_object_get_object(rootObject, "updateId");
-                if (updateIdObject == NULL)
-                {
-                    WriteLog("Could not get updateId object");
-                    return false;
-                }
-                // Get version from updateId object
-                const char* version = json_object_get_string(updateIdObject, "version");
-                if (version == NULL)
-                {
-                    WriteLog("Could not get version");
-                    return false;
-                }
-                // Get current version of the device
-                char* currentVersion = (char*)malloc(100);
-                FILE* versionFile = fopen("/etc/adu-version", "r");
-                if (versionFile == NULL)
-                {
-                    WriteLog("Could not open version file");
-                    return false;
-                }
-                fgets(currentVersion, 100, versionFile);
-                fclose(versionFile);
-                // Compare the version
-                if (IsNewVersion(currentVersion, version))
-                {
-                    WriteLog("ValidateNewFw: true");
-                    return true;
-                }
-            }
-        }
-        WriteLog("Close directory");
-        closedir(dir);
-    }
-    else
-    {
-        // Could not open directory
-        WriteLog("Could not open directory");
+        // Write log to /adu/adu-jeisys.log
+        WriteLog("Could not open version file");
         return false;
     }
+    fgets(currentVersion, 100, versionFile);
+    fclose(versionFile);
+
+    // Process the file name
+    // Get length of version text
+    int len = strlen(fileName);
+    // Remove the end of line character
+    if (fileName[len - 1] == '\n')
+        fileName[len - 1] = 0;
+    // Remove the .swu extension
+    char* version = (char*)malloc(strlen(fileName) - 4);
+    strncpy(version, fileName, strlen(fileName) - 4);
+    // Only get len size characters from end of the string
+    version[len] = 0;
+    WriteLog(version);
+    // The version are end of the string characters, the length of version is len of versionFile
+    // Compare the version
+    if (IsNewVersion(currentVersion, version))
+    {
+        // Write log to /adu/adu-jeisys.log
+        WriteLog("ValidateNewFw: true");
+        return true;
+    }
+
+    // Write log to /adu/adu-jeisys.log
     WriteLog("ValidateNewFw: false");
     return false;
 }
@@ -490,7 +446,7 @@ ADUC_Result SWUpdateHandlerImpl::Download(const tagADUC_WorkflowData* workflowDa
         WriteLog(fileName);
         if (IsSwuFile(fileName))
         {
-            if(!ValidateNewFw())
+            if(!ValidateNewFw(fileName))
             {
                 WriteLog("ValidateNewFw: false");
                 // goto done;
