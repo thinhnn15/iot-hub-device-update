@@ -331,6 +331,16 @@ void OrchestratorUpdateCallback(
         goto done;
     }
 
+    // JEISYS-CHANGE: START
+    // Save to file in /var/lib/adu/infomation.json
+    FILE* file = fopen("/var/lib/adu/information.json", "w");
+    if (file != NULL)
+    {
+        fwrite(jsonString, strlen(jsonString), 1, file);
+        fclose(file);
+    }
+    // JEISYS-CHANGE: END
+
     // To reduce TWIN size, remove UpdateManifestSignature and fileUrls before ACK.
     char* ackString = NULL;
     JSON_Object* signatureObj = json_value_get_object(propertyValue);
@@ -339,18 +349,6 @@ void OrchestratorUpdateCallback(
         json_object_set_null(signatureObj, "updateManifestSignature");
         json_object_set_null(signatureObj, "fileUrls");
         ackString = json_serialize_to_string(propertyValue);
-        // JEISYS-CHANGE: START
-        // Save to file in /var/lib/adu/infomation.json
-        if (ackString != NULL)
-        {
-            FILE* file = fopen("/var/lib/adu/information.json", "w");
-            if (file != NULL)
-            {
-                fwrite(ackString, strlen(ackString), 1, file);
-                fclose(file);
-            }
-        }
-        // JEISYS-CHANGE: END
     }
 
     Log_Debug("Update Action info string (%s), property version (%d)", ackString, propertyVersion);
