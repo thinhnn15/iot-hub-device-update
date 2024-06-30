@@ -317,12 +317,12 @@ ContentHandler* SWUpdateHandlerImpl::CreateContentHandler()
 ADUC_Result SWUpdateHandlerImpl::Download(const tagADUC_WorkflowData* workflowData)
 {
     Log_Info("SWUpdate handler v2 download task begin.");
-    // JEISYS-CHANGE: START
-    {
-        // Write the content "0" to file /var/lib/adu/aduFwValidation
-        SWUpdateHandlerImpl::WriteValueToFile("/var/lib/adu/aduFwValidation", "0");
-    }
-    // JEISYS-CHANGE: END
+    // // JEISYS-CHANGE: START
+    // {
+    //     // Write the content "0" to file /var/lib/adu/aduFwValidation
+    //     SWUpdateHandlerImpl::WriteValueToFile("/var/lib/adu/aduFwValidation", "0");
+    // }
+    // // JEISYS-CHANGE: END
 
     ADUC_WorkflowHandle workflowHandle = workflowData->WorkflowHandle;
     char* installedCriteria = nullptr;
@@ -372,7 +372,13 @@ ADUC_Result SWUpdateHandlerImpl::Download(const tagADUC_WorkflowData* workflowDa
                 entity = nullptr;
                 if (IsAducResultCodeFailure(result.ResultCode))
                 {
-                    WriteLog("Cannot download payload file");
+                    WriteLog("Invalid value in /var/lib/adu/aduFwValidation");
+                    // // JEISYS-CHANGE: START
+                    // {
+                    //     // Write the content "0" to file /var/lib/adu/aduFwValidation
+                    //     SWUpdateHandlerImpl::WriteValueToFile("/var/lib/adu/aduFwValidation", "0");
+                    // }
+                    // // JEISYS-CHANGE: END
                     goto done;
                 }
             }
