@@ -427,6 +427,50 @@ done:
  */
 ADUC_Result SWUpdateHandlerImpl::Install(const tagADUC_WorkflowData* workflowData)
 {
+    // Read the confirmation file from user to proceed with the install.
+    // The file: /usr/lib/adu/aduInstallConfirmation.txt
+    // The content: "1" to proceed, "0" to cancel.
+    // If the file doesn't exist, proceed with the install.
+    // If the content is "0", cancel the install.
+    // If the content is "1", proceed with the install.
+    // If the content is invalid, cancel the install.
+    // JEISYS-CHANGE: START
+    // Set the timeout to 10 minutes
+    int timeout = 0;
+    // Get the content in file /usr/lib/adu/aduInstallConfirmation.txt
+    std::string content = SWUpdateHandlerImpl::WriteValueToFile("/usr/lib/adu/aduInstallConfirmation.txt", "0");
+    while(true){
+        // Check the result is "1": Proceed with the install
+        if (content == "1")
+        {
+            WriteLog("Proceed with the install");
+            break;
+        }
+        // Check the result is "0": The initial value
+        else if (content == "0")
+        {
+            if(bTimeout > 600)
+            {
+                WriteLog("Timeout");
+                return { .ResultCode = ADUC_Result_Failure_Cancelled,
+                         .ExtendedResultCode = 0 };
+            }
+            // Wait for the content to be changed
+            timeout++;
+            // Sleep for 1 second
+            sleep(1);
+            WriteLog("Wait for the content to be changed");
+            continue;
+        }
+        // Invalid value
+        else
+        {
+            WriteLog("Invalid value in /usr/lib/adu/aduInstallConfirmation.txt");
+            return { .ResultCode = ADUC_Result_Failure_Cancelled,
+                     .ExtendedResultCode = 0 };
+        }
+    }
+    // JEISYS-CHANGE: END
     ADUC_Result result = PerformAction("--action-install", workflowData);
     return result;
 }
