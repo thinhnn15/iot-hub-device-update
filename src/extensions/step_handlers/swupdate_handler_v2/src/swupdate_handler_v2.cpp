@@ -438,7 +438,7 @@ ADUC_Result SWUpdateHandlerImpl::Install(const tagADUC_WorkflowData* workflowDat
     // Set the timeout to 10 minutes
     int timeout = 0;
     // Get the content in file /usr/lib/adu/aduInstallConfirmation.txt
-    std::string content = SWUpdateHandlerImpl::WriteValueToFile("/usr/lib/adu/aduInstallConfirmation.txt", "0");
+    SWUpdateHandlerImpl::WriteValueToFile("/usr/lib/adu/aduInstallConfirmation.txt", "0");
     while(true){
         // Check the result is "1": Proceed with the install
         if (content == "1")
@@ -449,7 +449,7 @@ ADUC_Result SWUpdateHandlerImpl::Install(const tagADUC_WorkflowData* workflowDat
         // Check the result is "0": The initial value
         else if (content == "0")
         {
-            if(bTimeout > 600)
+            if(timeout > 600)
             {
                 WriteLog("Timeout");
                 return { .ResultCode = ADUC_Result_Failure_Cancelled,
