@@ -373,12 +373,12 @@ ADUC_Result SWUpdateHandlerImpl::Download(const tagADUC_WorkflowData* workflowDa
                 if (IsAducResultCodeFailure(result.ResultCode))
                 {
                     WriteLog("Invalid value in /var/lib/adu/aduFwValidation");
-                    // // JEISYS-CHANGE: START
-                    // {
-                    //     // Write the content "0" to file /var/lib/adu/aduFwValidation
-                    //     SWUpdateHandlerImpl::WriteValueToFile("/var/lib/adu/aduFwValidation", "0");
-                    // }
-                    // // JEISYS-CHANGE: END
+                    // JEISYS-CHANGE: START
+                    {
+                        // Write the content "0" to file /var/lib/adu/aduFwValidation
+                        SWUpdateHandlerImpl::WriteValueToFile("/var/lib/adu/aduFwValidation", "0");
+                    }
+                    // JEISYS-CHANGE: END
                     goto done;
                 }
             }
