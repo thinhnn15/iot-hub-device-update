@@ -440,6 +440,7 @@ ADUC_Result SWUpdateHandlerImpl::Install(const tagADUC_WorkflowData* workflowDat
     // Get the content in file /usr/lib/adu/aduInstallConfirmation.txt
     SWUpdateHandlerImpl::WriteValueToFile("/usr/lib/adu/aduInstallConfirmation.txt", "0");
     while(true){
+        std::string content = SWUpdateHandlerImpl::ReadValueFromFile("/usr/lib/adu/aduInstallConfirmation.txt");
         // Check the result is "1": Proceed with the install
         if (content == "1")
         {
