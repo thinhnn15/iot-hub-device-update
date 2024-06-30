@@ -60,7 +60,8 @@ SWUpdateHandlerImpl::~SWUpdateHandlerImpl() // override
 // Add write log function
 void WriteLog(const char* log)
 {
-    // TODO: Need to remove this logic in release version
+    // Need to remove this logic in release version
+    return;
     FILE* fp = fopen("/adu/aduAgentLog", "w");
     if (fp == NULL)
     {
@@ -435,10 +436,14 @@ ADUC_Result SWUpdateHandlerImpl::Install(const tagADUC_WorkflowData* workflowDat
         std::string content = SWUpdateHandlerImpl::ReadValueFromFile("/usr/lib/adu/aduInstallConfirmation.txt");
         if (content == "OK")
         {
+            // Log the content
+            Log_Info("The content of /usr/lib/adu/aduInstallConfirmation.txt is OK");
             break;
         }
         else if (content == "NG")
         {
+            // Log the content
+            Log_Info("The content of /usr/lib/adu/aduInstallConfirmation.txt is NG");
             return { ADUC_Result_Failure_Cancelled };
         }
         else
