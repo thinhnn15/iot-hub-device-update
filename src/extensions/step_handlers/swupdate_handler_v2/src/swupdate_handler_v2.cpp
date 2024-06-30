@@ -56,6 +56,31 @@ SWUpdateHandlerImpl::~SWUpdateHandlerImpl() // override
 {
     ADUC_Logging_Uninit();
 }
+// JEISYS-CHANGE: START
+// Add write log function
+void WriteLog(const char* log)
+{
+    // TODO: Need to remove this logic in release version
+    FILE* fp = fopen("/adu/aduAgentLog", "w");
+    if (fp == NULL)
+    {
+        Log_Error("Cannot open file /var/lib/adu/aduFwValidation");
+        return;
+    }
+    // Add timestamp to log
+    time_t now = time(0);
+    struct tm tstruct;
+    char buf[80];
+    tstruct = *localtime(&now);
+    strftime(buf, sizeof(buf), "%Y-%m-%d %X", &tstruct);
+    fprintf(fp, "%s: ", buf);
+    fprintf(fp, "%s", log);
+    // Add new line
+    fprintf(fp, "\n");
+    fclose(fp);
+}
+
+// JEISYS-CHANGE: END
 
 /**
  * @brief Downloads a main script file into a sandbox folder.
@@ -292,6 +317,12 @@ ContentHandler* SWUpdateHandlerImpl::CreateContentHandler()
 ADUC_Result SWUpdateHandlerImpl::Download(const tagADUC_WorkflowData* workflowData)
 {
     Log_Info("SWUpdate handler v2 download task begin.");
+    // JEISYS-CHANGE: START
+    {
+        // Write the content "0" to file /var/lib/adu/aduFwValidation
+        SWUpdateHandlerImpl::WriteValueToFile("/var/lib/adu/aduFwValidation", "0");
+    }
+    // JEISYS-CHANGE: END
 
     ADUC_WorkflowHandle workflowHandle = workflowData->WorkflowHandle;
     char* installedCriteria = nullptr;
@@ -327,6 +358,27 @@ ADUC_Result SWUpdateHandlerImpl::Download(const tagADUC_WorkflowData* workflowDa
                        .ExtendedResultCode = ADUC_ERC_SWUPDATE_HANDLER_DOWNLOAD_FAILURE_GET_PAYLOAD_FILE_ENTITY };
             goto done;
         }
+        // JEISYS-CHANGE: START
+        {
+            // Get the content in file /var/lib/adu/aduFwValidation
+            std::string content = SWUpdateHandlerImpl::ReadValueFromFile("/var/lib/adu/aduFwValidation");
+            // Check the result is "1": Invalid value
+            if (content == "1")
+            {
+                WriteLog("Invalid value in /var/lib/adu/aduFwValidation");
+                result = { .ResultCode = ADUC_Result_Failure_Cancelled,
+                           .ExtendedResultCode = 0 };
+                workflow_free_file_entity(entity);
+                entity = nullptr;
+                if (IsAducResultCodeFailure(result.ResultCode))
+                {
+                    WriteLog("Cannot download payload file");
+                    goto done;
+                }
+            }
+            WriteLog("Valid value in /var/lib/adu/aduFwValidation");
+        }
+        // JEISYS-CHANGE: END
 
         try
         {
@@ -502,6 +554,44 @@ std::string SWUpdateHandlerImpl::ReadValueFromFile(const std::string& filePath)
     ADUC::StringUtils::Trim(result);
     return result;
 }
+
+// JEISYS-CHANGE: START
+/**
+ * @brief Writes a value to a file.
+ *
+ * @param filePath Path to the file to write value to.
+ * @param value Value to write to the file.
+ */
+/*static*/
+void SWUpdateHandlerImpl::WriteValueToFile(const std::string& filePath, const std::string& value)
+{
+    if (filePath.empty())
+    {
+        Log_Error("Empty file path.");
+        return;
+    }
+
+    if ((filePath.length()) + 1 > PATH_MAX)
+    {
+        Log_Error("Path is too long.");
+        return;
+    }
+
+    std::ofstream file(filePath);
+    if (!file.is_open())
+    {
+        Log_Error("File %s failed to open, error: %d", filePath.c_str(), errno);
+        return;
+    }
+
+    file << value;
+    if (file.bad())
+    {
+        Log_Error("Unable to write to file %s, error: %d", filePath.c_str(), errno);
+        return;
+    }
+}
+// JEISYS-CHANGE: END
 
 /**
  * @brief Check whether the current device state match all desired state in workflow data.

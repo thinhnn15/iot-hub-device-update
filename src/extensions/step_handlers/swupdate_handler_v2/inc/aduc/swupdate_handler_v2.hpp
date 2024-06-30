@@ -43,7 +43,9 @@ public:
 
     static std::string ReadValueFromFile(const std::string& filePath);
     static ADUC_Result ReadConfig(const std::string& configFile, std::unordered_map<std::string, std::string>& values);
-
+    // JEISYS-CHANGE: START
+    static void WriteValueToFile(const std::string& filePath, const std::string& value);
+    // JEISYS-CHANGE: END
     static ADUC_Result PrepareCommandArguments(
         const ADUC_WorkflowHandle workflowHandle,
         std::string resultFilePath,
