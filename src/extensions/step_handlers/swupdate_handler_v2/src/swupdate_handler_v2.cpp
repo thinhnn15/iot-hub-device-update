@@ -353,7 +353,23 @@ ADUC_Result SWUpdateHandlerImpl::Download(const tagADUC_WorkflowData* workflowDa
     while (true)
     {
         // Read content from file /usr/lib/adu/aduDownloadConfirmation.txt
-        std::string content = SWUpdateHandlerImpl::ReadValueFromFile(fileName);
+        FILE* fp = fopen(fileName.c_str(), "r");
+        if (fp == NULL)
+        {
+            Log_Error("Cannot open file /usr/lib/adu/aduDownloadConfirmation.txt");
+            result = { ADUC_Result_Failure_Cancelled };
+            goto done;
+        }
+        // Read the content
+        char buffer[256];
+        std::string content;
+        while (fgets(buffer, sizeof(buffer), fp) != NULL)
+        {
+            content += buffer;
+        }
+        // Close the file
+        fclose(fp);
+        Log_Info("JEISYS-DEBUG: The content of /usr/lib/adu/aduDownloadConfirmation.txt is %s", content.c_str());
         // Check the content is "OK" or "NG"
         if (content == "OK")
         {
