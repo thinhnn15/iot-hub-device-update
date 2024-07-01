@@ -398,6 +398,31 @@ ADUC_Result SWUpdateHandlerImpl::Download(const tagADUC_WorkflowData* workflowDa
 
     // JEISYS-CHANGE: END
 
+    // JEISYS-CHANGE: START
+    {
+        // Get the content in file /usr/lib/adu/aduFwValidation.txt
+        std::string content = SWUpdateHandlerImpl::ReadValueFromFile("/usr/lib/adu/aduFwValidation.txt");
+        // Check the result is "1" or contains "1"
+        if (content.find("1") != std::string::npos)
+        {
+            Log_Info("Valid value in /usr/lib/adu/aduFwValidation.txt");
+        }
+        else
+        {
+            Log_Info("Invalid value in /usr/lib/adu/aduFwValidation.txt");
+            result = { .ResultCode = ADUC_Result_Failure_Cancelled, .ExtendedResultCode = 0 };
+            workflow_free_file_entity(entity);
+            entity = nullptr;
+            if (IsAducResultCodeFailure(result.ResultCode))
+            {
+                Log_Info("JEISYS-DEBUG: Write 0 to /usr/lib/adu/aduFwValidation.txt");
+                SWUpdateHandlerImpl::WriteValueToFile("/usr/lib/adu/aduFwValidation.txt", "0");
+                goto done;
+            }
+        }
+    }
+    // JEISYS-CHANGE: END
+
     for (int i = 0; i < fileCount; i++)
     {
         Log_Info("Downloading file #%d", i);
@@ -408,33 +433,6 @@ ADUC_Result SWUpdateHandlerImpl::Download(const tagADUC_WorkflowData* workflowDa
                        .ExtendedResultCode = ADUC_ERC_SWUPDATE_HANDLER_DOWNLOAD_FAILURE_GET_PAYLOAD_FILE_ENTITY };
             goto done;
         }
-
-
-        // JEISYS-CHANGE: START
-        {
-            // Get the content in file /usr/lib/adu/aduFwValidation.txt
-            std::string content = SWUpdateHandlerImpl::ReadValueFromFile("/usr/lib/adu/aduFwValidation.txt");
-            // Check the result is "1" or contains "1"
-            if (content.find("1") != std::string::npos)
-            {
-                Log_Info("Valid value in /usr/lib/adu/aduFwValidation.txt");
-            }
-            else
-            {
-                Log_Info("Invalid value in /usr/lib/adu/aduFwValidation.txt");
-                result = { .ResultCode = ADUC_Result_Failure_Cancelled,
-                           .ExtendedResultCode = 0 };
-                workflow_free_file_entity(entity);
-                entity = nullptr;
-                if (IsAducResultCodeFailure(result.ResultCode))
-                {
-                    Log_Info("JEISYS-DEBUG: Write 0 to /usr/lib/adu/aduFwValidation.txt");
-                    SWUpdateHandlerImpl::WriteValueToFile("/usr/lib/adu/aduFwValidation.txt", "0");
-                    goto done;
-                }
-            }
-        }
-        // JEISYS-CHANGE: END
 
         try
         {
@@ -646,6 +644,8 @@ void SWUpdateHandlerImpl::WriteValueToFile(const std::string& filePath, const st
         Log_Error("Unable to write to file %s, error: %d", filePath.c_str(), errno);
         return;
     }
+    // Close the file
+    file.close();
 }
 // JEISYS-CHANGE: END
 
