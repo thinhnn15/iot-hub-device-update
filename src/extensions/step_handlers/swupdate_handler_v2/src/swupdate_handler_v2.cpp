@@ -408,34 +408,6 @@ ADUC_Result SWUpdateHandlerImpl::Download(const tagADUC_WorkflowData* workflowDa
                        .ExtendedResultCode = ADUC_ERC_SWUPDATE_HANDLER_DOWNLOAD_FAILURE_GET_PAYLOAD_FILE_ENTITY };
             goto done;
         }
-        // JEISYS-CHANGE: START
-        {
-            // Get the content in file /var/lib/adu/aduFwValidation
-            std::string content = SWUpdateHandlerImpl::ReadValueFromFile("/var/lib/adu/aduFwValidation");
-            // Check the result is "1": Invalid value
-            if (content == "1")
-            {
-                WriteLog("Invalid value in /var/lib/adu/aduFwValidation");
-                result = { .ResultCode = ADUC_Result_Failure_Cancelled,
-                           .ExtendedResultCode = 0 };
-                workflow_free_file_entity(entity);
-                entity = nullptr;
-                if (IsAducResultCodeFailure(result.ResultCode))
-                {
-                    WriteLog("Invalid value in /var/lib/adu/aduFwValidation");
-                    // JEISYS-CHANGE: START
-                    {
-                        // Write the content "0" to file /var/lib/adu/aduFwValidation
-                        SWUpdateHandlerImpl::WriteValueToFile("/var/lib/adu/aduFwValidation", "0");
-                    }
-                    // JEISYS-CHANGE: END
-                    goto done;
-                }
-            }
-            WriteLog("Valid value in /var/lib/adu/aduFwValidation");
-        }
-        // JEISYS-CHANGE: END
-
         try
         {
             result = ExtensionManager::Download(
