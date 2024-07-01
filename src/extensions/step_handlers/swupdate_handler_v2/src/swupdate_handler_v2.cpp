@@ -428,7 +428,7 @@ ADUC_Result SWUpdateHandlerImpl::Download(const tagADUC_WorkflowData* workflowDa
                 entity = nullptr;
                 if (IsAducResultCodeFailure(result.ResultCode))
                 {
-                    Log_Info("JEISYS-DEBUG: Write 0 to /usr/lib/adu/aduFwValidation.txt")
+                    Log_Info("JEISYS-DEBUG: Write 0 to /usr/lib/adu/aduFwValidation.txt");
                     SWUpdateHandlerImpl::WriteValueToFile("/usr/lib/adu/aduFwValidation.txt", "0");
                     goto done;
                 }
