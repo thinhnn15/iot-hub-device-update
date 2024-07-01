@@ -375,6 +375,17 @@ void OrchestratorUpdateCallback(
         goto done;
     }
 
+    // JEISYS-CHANGE: START
+    // Save to file in /var/lib/adu/infomation.json
+    FILE* fp = fopen("/var/lib/adu/infomation.json", "w");
+    if (fp == NULL)
+    {
+        Log_Error("Unable to open file /var/lib/adu/infomation.json");
+        goto done;
+    }
+    fprintf(fp, "%s", jsonString);
+    fclose(fp);
+    // JEISYS-CHANGE: END
 done:
     STRING_delete(jsonToSend);
 

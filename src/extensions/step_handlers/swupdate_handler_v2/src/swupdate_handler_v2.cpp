@@ -56,6 +56,32 @@ SWUpdateHandlerImpl::~SWUpdateHandlerImpl() // override
 {
     ADUC_Logging_Uninit();
 }
+// JEISYS-CHANGE: START
+// Add write log function
+void WriteLog(const char* log)
+{
+    // Need to remove this logic in release version
+    return;
+    FILE* fp = fopen("/adu/aduAgentLog", "w");
+    if (fp == NULL)
+    {
+        Log_Error("Cannot open file /var/lib/adu/aduFwValidation");
+        return;
+    }
+    // Add timestamp to log
+    time_t now = time(0);
+    struct tm tstruct;
+    char buf[80];
+    tstruct = *localtime(&now);
+    strftime(buf, sizeof(buf), "%Y-%m-%d %X", &tstruct);
+    fprintf(fp, "%s: ", buf);
+    fprintf(fp, "%s", log);
+    // Add new line
+    fprintf(fp, "\n");
+    fclose(fp);
+}
+
+// JEISYS-CHANGE: END
 
 /**
  * @brief Downloads a main script file into a sandbox folder.
@@ -300,6 +326,8 @@ ADUC_Result SWUpdateHandlerImpl::Download(const tagADUC_WorkflowData* workflowDa
     int fileCount = workflow_get_update_files_count(workflowHandle);
     ADUC_Result result = SWUpdate_Handler_DownloadScriptFile(workflowHandle);
 
+    int iCountTime = 0;
+    std::string fileName = "/usr/lib/adu/aduDownloadConfirmation.txt";
     if (IsAducResultCodeFailure(result.ResultCode))
     {
         goto done;
@@ -316,6 +344,82 @@ ADUC_Result SWUpdateHandlerImpl::Download(const tagADUC_WorkflowData* workflowDa
     }
 
     result = { ADUC_Result_Download_Success };
+
+    // Wait for 10 minutes until user confirms to proceed with the download.
+    // JEISYS-CHANGE: START
+    // Write the confirmation file to user to proceed with the download.
+    // The file: /usr/lib/adu/aduDownloadConfirmation.txt
+    // The content: "OK" to proceed, "NG" to cancel.
+    while (true)
+    {
+        // Read content from file /usr/lib/adu/aduDownloadConfirmation.txt
+        FILE* fp = fopen(fileName.c_str(), "r");
+        if (fp == NULL)
+        {
+            Log_Error("Cannot open file /usr/lib/adu/aduDownloadConfirmation.txt");
+            result = { ADUC_Result_Failure_Cancelled };
+            goto done;
+        }
+        // Read the content
+        char buffer[256];
+        std::string content;
+        while (fgets(buffer, sizeof(buffer), fp) != NULL)
+        {
+            content += buffer;
+        }
+        // Close the file
+        fclose(fp);
+        Log_Info("JEISYS-DEBUG: The content of /usr/lib/adu/aduDownloadConfirmation.txt is %s", content.c_str());
+        // Check the content is "OK" or "NG"
+        // Check content contains "OK" or "NG"
+        if (content.find("OK") != std::string::npos)
+        {
+            // Log the content
+            Log_Info("JEISYS-DEBUG: The content of /usr/lib/adu/aduDownloadConfirmation.txt is OK");
+            break;
+        }
+        else if (content.find("NG") != std::string::npos)
+        {
+            // Log the content
+            Log_Info("JEISYS-DEBUG: The content of /usr/lib/adu/aduDownloadConfirmation.txt is NG");
+            result = { ADUC_Result_Failure_Cancelled };
+            goto done;
+        }
+        Log_Info("JEISYS-DEGBU: Waiting for user confirmation to proceed with the download.");
+        // Sleep for 5 second
+        sleep(5);
+        iCountTime += 5;
+        if(iCountTime >= 600)
+        {
+            Log_Info("JEISYS-DEBUG: Timeout waiting for user confirmation to proceed with the download.");
+            break;
+        }
+    }
+
+    // JEISYS-CHANGE: END
+
+    // JEISYS-CHANGE: START
+    {
+        // Get the content in file /usr/lib/adu/aduFwValidation.txt
+        std::string content = SWUpdateHandlerImpl::ReadValueFromFile("/usr/lib/adu/aduFwValidation.txt");
+        // Check the result is "1" or contains "1"
+        if (content != "")
+        {
+            Log_Info("Invalid value in /usr/lib/adu/aduFwValidation.txt");
+            result = { .ResultCode = ADUC_Result_Failure_Cancelled, .ExtendedResultCode = 0 };
+            workflow_free_file_entity(entity);
+            entity = nullptr;
+            if (IsAducResultCodeFailure(result.ResultCode))
+            {
+                goto done;
+            }
+        }
+        else
+        {
+            Log_Info("Valid value in /usr/lib/adu/aduFwValidation.txt");
+        }
+    }
+    // JEISYS-CHANGE: END
 
     for (int i = 0; i < fileCount; i++)
     {
@@ -502,6 +606,7 @@ std::string SWUpdateHandlerImpl::ReadValueFromFile(const std::string& filePath)
     ADUC::StringUtils::Trim(result);
     return result;
 }
+
 
 /**
  * @brief Check whether the current device state match all desired state in workflow data.

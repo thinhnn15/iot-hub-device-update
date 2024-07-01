@@ -43,7 +43,6 @@ public:
 
     static std::string ReadValueFromFile(const std::string& filePath);
     static ADUC_Result ReadConfig(const std::string& configFile, std::unordered_map<std::string, std::string>& values);
-
     static ADUC_Result PrepareCommandArguments(
         const ADUC_WorkflowHandle workflowHandle,
         std::string resultFilePath,
