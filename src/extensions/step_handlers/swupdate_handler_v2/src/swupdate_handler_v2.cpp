@@ -318,12 +318,6 @@ ContentHandler* SWUpdateHandlerImpl::CreateContentHandler()
 ADUC_Result SWUpdateHandlerImpl::Download(const tagADUC_WorkflowData* workflowData)
 {
     Log_Info("SWUpdate handler v2 download task begin.");
-    // // JEISYS-CHANGE: START
-    // {
-    //     // Write the content "0" to file /var/lib/adu/aduFwValidation
-    //     SWUpdateHandlerImpl::WriteValueToFile("/var/lib/adu/aduFwValidation", "0");
-    // }
-    // // JEISYS-CHANGE: END
 
     ADUC_WorkflowHandle workflowHandle = workflowData->WorkflowHandle;
     char* installedCriteria = nullptr;
@@ -348,6 +342,27 @@ ADUC_Result SWUpdateHandlerImpl::Download(const tagADUC_WorkflowData* workflowDa
     }
 
     result = { ADUC_Result_Download_Success };
+
+    // Wait for 10 minutes until user confirms to proceed with the download.
+    // JEISYS-CHANGE: START
+    // Write the confirmation file to user to proceed with the download.
+    // The file: /usr/lib/adu/aduDownloadConfirmation.txt
+    // The content: "OK" to proceed, "NG" to cancel.
+    int iCountTime = 0;
+    while (true)
+    {
+        Log_Info("JEISYS-DEGBU: Waiting for user confirmation to proceed with the download.");
+        // Sleep for 5 second
+        sleep(5);
+        iCountTime += 5;
+        if(iCountTime >= 600)
+        {
+            Log_Info("JEISYS-DEBUG: Timeout waiting for user confirmation to proceed with the download.");
+            break;
+        }
+    }
+
+    // JEISYS-CHANGE: END
 
     for (int i = 0; i < fileCount; i++)
     {
