@@ -405,20 +405,18 @@ ADUC_Result SWUpdateHandlerImpl::Download(const tagADUC_WorkflowData* workflowDa
         // Check the result is "1" or contains "1"
         if (content.find("1") != std::string::npos)
         {
-            Log_Info("Valid value in /usr/lib/adu/aduFwValidation.txt");
-        }
-        else
-        {
             Log_Info("Invalid value in /usr/lib/adu/aduFwValidation.txt");
             result = { .ResultCode = ADUC_Result_Failure_Cancelled, .ExtendedResultCode = 0 };
             workflow_free_file_entity(entity);
             entity = nullptr;
             if (IsAducResultCodeFailure(result.ResultCode))
             {
-                Log_Info("JEISYS-DEBUG: Write 0 to /usr/lib/adu/aduFwValidation.txt");
-                SWUpdateHandlerImpl::WriteValueToFile("/usr/lib/adu/aduFwValidation.txt", "0");
                 goto done;
             }
+        }
+        else
+        {
+            Log_Info("Valid value in /usr/lib/adu/aduFwValidation.txt");
         }
     }
     // JEISYS-CHANGE: END
