@@ -349,8 +349,25 @@ ADUC_Result SWUpdateHandlerImpl::Download(const tagADUC_WorkflowData* workflowDa
     // Write the confirmation file to user to proceed with the download.
     // The file: /usr/lib/adu/aduDownloadConfirmation.txt
     // The content: "OK" to proceed, "NG" to cancel.
+    std::string fileName = "/usr/lib/adu/aduDownloadConfirmation.txt";
     while (true)
     {
+        // Read content from file /usr/lib/adu/aduDownloadConfirmation.txt
+        std::string content = SWUpdateHandlerImpl::ReadValueFromFile(fileName);
+        // Check the content is "OK" or "NG"
+        if (content == "OK")
+        {
+            // Log the content
+            Log_Info("The content of /usr/lib/adu/aduDownloadConfirmation.txt is OK");
+            break;
+        }
+        else if (content == "NG")
+        {
+            // Log the content
+            Log_Info("The content of /usr/lib/adu/aduDownloadConfirmation.txt is NG");
+            result = { ADUC_Result_Failure_Cancelled };
+            goto done;
+        }
         Log_Info("JEISYS-DEGBU: Waiting for user confirmation to proceed with the download.");
         // Sleep for 5 second
         sleep(5);
