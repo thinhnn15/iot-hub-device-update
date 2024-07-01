@@ -403,7 +403,7 @@ ADUC_Result SWUpdateHandlerImpl::Download(const tagADUC_WorkflowData* workflowDa
         // Get the content in file /usr/lib/adu/aduFwValidation.txt
         std::string content = SWUpdateHandlerImpl::ReadValueFromFile("/usr/lib/adu/aduFwValidation.txt");
         // Check the result is "1" or contains "1"
-        if (content.find("1") != std::string::npos)
+        if (content != "")
         {
             Log_Info("Invalid value in /usr/lib/adu/aduFwValidation.txt");
             result = { .ResultCode = ADUC_Result_Failure_Cancelled, .ExtendedResultCode = 0 };
