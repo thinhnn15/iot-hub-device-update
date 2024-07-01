@@ -326,6 +326,7 @@ ADUC_Result SWUpdateHandlerImpl::Download(const tagADUC_WorkflowData* workflowDa
     int fileCount = workflow_get_update_files_count(workflowHandle);
     ADUC_Result result = SWUpdate_Handler_DownloadScriptFile(workflowHandle);
 
+    int iCountTime = 0;
     if (IsAducResultCodeFailure(result.ResultCode))
     {
         goto done;
@@ -348,7 +349,6 @@ ADUC_Result SWUpdateHandlerImpl::Download(const tagADUC_WorkflowData* workflowDa
     // Write the confirmation file to user to proceed with the download.
     // The file: /usr/lib/adu/aduDownloadConfirmation.txt
     // The content: "OK" to proceed, "NG" to cancel.
-    int iCountTime = 0;
     while (true)
     {
         Log_Info("JEISYS-DEGBU: Waiting for user confirmation to proceed with the download.");
