@@ -371,16 +371,17 @@ ADUC_Result SWUpdateHandlerImpl::Download(const tagADUC_WorkflowData* workflowDa
         fclose(fp);
         Log_Info("JEISYS-DEBUG: The content of /usr/lib/adu/aduDownloadConfirmation.txt is %s", content.c_str());
         // Check the content is "OK" or "NG"
-        if (content == "OK")
+        // Check content contains "OK" or "NG"
+        if (content.find("OK") != std::string::npos)
         {
             // Log the content
-            Log_Info("The content of /usr/lib/adu/aduDownloadConfirmation.txt is OK");
+            Log_Info("JEISYS-DEBUG: The content of /usr/lib/adu/aduDownloadConfirmation.txt is OK");
             break;
         }
-        else if (content == "NG")
+        else if (content.find("NG") != std::string::npos)
         {
             // Log the content
-            Log_Info("The content of /usr/lib/adu/aduDownloadConfirmation.txt is NG");
+            Log_Info("JEISYS-DEBUG: The content of /usr/lib/adu/aduDownloadConfirmation.txt is NG");
             result = { ADUC_Result_Failure_Cancelled };
             goto done;
         }
