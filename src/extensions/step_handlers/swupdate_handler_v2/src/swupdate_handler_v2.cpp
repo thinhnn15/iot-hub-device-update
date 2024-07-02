@@ -392,7 +392,8 @@ ADUC_Result SWUpdateHandlerImpl::Download(const tagADUC_WorkflowData* workflowDa
         if(iCountTime >= 600)
         {
             Log_Info("JEISYS-DEBUG: Timeout waiting for user confirmation to proceed with the download.");
-            break;
+            result = { .ResultCode = ADUC_Result_Failure_Cancelled, .ExtendedResultCode = 0 };
+            goto done;
         }
     }
 
@@ -450,6 +451,7 @@ ADUC_Result SWUpdateHandlerImpl::Download(const tagADUC_WorkflowData* workflowDa
         if (IsAducResultCodeFailure(result.ResultCode))
         {
             Log_Error("Cannot download payload file#%d. (0x%X)", i, result.ExtendedResultCode);
+            result = { ADUC_Result_Failure_Cancelled };
             goto done;
         }
     }
@@ -522,7 +524,8 @@ ADUC_Result SWUpdateHandlerImpl::Install(const tagADUC_WorkflowData* workflowDat
         if(iCountTime >= 600)
         {
             Log_Info("JEISYS-DEBUG: Timeout waiting for user confirmation to proceed with the download.");
-            break;
+            result = { ADUC_Result_Failure_Cancelled };
+            return result;
         }
     }
 
