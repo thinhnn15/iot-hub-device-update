@@ -370,7 +370,6 @@ ADUC_Result SWUpdateHandlerImpl::Download(const tagADUC_WorkflowData* workflowDa
         // Close the file
         fclose(fp);
         Log_Info("JEISYS-DEBUG: The content of /usr/lib/adu/aduDownloadConfirmation.txt is %s", content.c_str());
-        // Check the content is "OK" or "NG"
         // Check content contains "OK" or "NG"
         if (content.find("OK") != std::string::npos)
         {
@@ -388,13 +387,6 @@ ADUC_Result SWUpdateHandlerImpl::Download(const tagADUC_WorkflowData* workflowDa
         Log_Info("JEISYS-DEGBU: Waiting for user confirmation to proceed with the download.");
         // Sleep for 5 second
         sleep(5);
-        iCountTime += 5;
-        if(iCountTime >= 600)
-        {
-            Log_Info("JEISYS-DEBUG: Timeout waiting for user confirmation to proceed with the download.");
-            result = { .ResultCode = ADUC_Result_Failure_Cancelled, .ExtendedResultCode = 0 };
-            goto done;
-        }
     }
 
     // JEISYS-CHANGE: END
@@ -520,13 +512,6 @@ ADUC_Result SWUpdateHandlerImpl::Install(const tagADUC_WorkflowData* workflowDat
         Log_Info("JEISYS-DEBUG: Waiting for user confirmation to proceed with the download.");
         // Sleep for 5 second
         sleep(5);
-        iCountTime += 5;
-        if(iCountTime >= 600)
-        {
-            Log_Info("JEISYS-DEBUG: Timeout waiting for user confirmation to proceed with the download.");
-            result = { ADUC_Result_Failure_Cancelled };
-            return result;
-        }
     }
 
     // JEISYS-CHANGE: END
