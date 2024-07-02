@@ -479,6 +479,8 @@ ADUC_Result SWUpdateHandlerImpl::Install(const tagADUC_WorkflowData* workflowDat
     // Write the confirmation file to user to proceed with the download.
     // The file: /usr/lib/adu/aduInstallConfirmation.txt
     // The content: "OK" to proceed, "NG" to cancel.
+    std::string fileName = "/usr/lib/adu/aduInstallConfirmation.txt";
+    int iCountTime = 0;
     while (true)
     {
         // Read content from file /usr/lib/adu/aduInstallConfirmation.txt
