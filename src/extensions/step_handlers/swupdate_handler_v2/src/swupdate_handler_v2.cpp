@@ -479,6 +479,7 @@ ADUC_Result SWUpdateHandlerImpl::Install(const tagADUC_WorkflowData* workflowDat
     // Write the confirmation file to user to proceed with the download.
     // The file: /usr/lib/adu/aduInstallConfirmation.txt
     // The content: "OK" to proceed, "NG" to cancel.
+    ADUC_Result result = { ADUC_Result_Install_Success };
     std::string fileName = "/usr/lib/adu/aduInstallConfirmation.txt";
     int iCountTime = 0;
     while (true)
@@ -489,7 +490,7 @@ ADUC_Result SWUpdateHandlerImpl::Install(const tagADUC_WorkflowData* workflowDat
         {
             Log_Error("Cannot open file /usr/lib/adu/aduInstallConfirmation.txt");
             result = { ADUC_Result_Failure_Cancelled };
-            goto done;
+            return result;
         }
         // Read the content
         char buffer[256];
@@ -513,7 +514,7 @@ ADUC_Result SWUpdateHandlerImpl::Install(const tagADUC_WorkflowData* workflowDat
             // Log the content
             Log_Info("JEISYS-DEBUG: The content of /usr/lib/adu/aduInstallConfirmation.txt is NG");
             result = { ADUC_Result_Failure_Cancelled };
-            goto done;
+            return result;
         }
         Log_Info("JEISYS-DEBUG: Waiting for user confirmation to proceed with the download.");
         // Sleep for 5 second
@@ -527,7 +528,7 @@ ADUC_Result SWUpdateHandlerImpl::Install(const tagADUC_WorkflowData* workflowDat
     }
 
     // JEISYS-CHANGE: END
-    ADUC_Result result = PerformAction("--action-install", workflowData);
+    result = PerformAction("--action-install", workflowData);
     return result;
 }
 
