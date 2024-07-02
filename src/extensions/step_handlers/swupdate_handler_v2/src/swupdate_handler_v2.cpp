@@ -473,7 +473,6 @@ done:
  */
 ADUC_Result SWUpdateHandlerImpl::Install(const tagADUC_WorkflowData* workflowData)
 {
-    ADUC_Result result = { ADUC_Result_Install_Success };
     // Wait for 10 minutes until user confirms to proceed with the download.
     // JEISYS-CHANGE: START
     // Write the confirmation file to user to proceed with the download.
