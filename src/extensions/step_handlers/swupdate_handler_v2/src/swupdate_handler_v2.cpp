@@ -473,6 +473,58 @@ done:
  */
 ADUC_Result SWUpdateHandlerImpl::Install(const tagADUC_WorkflowData* workflowData)
 {
+    result = { ADUC_Result_Install_Success };
+    // Wait for 10 minutes until user confirms to proceed with the download.
+    // JEISYS-CHANGE: START
+    // Write the confirmation file to user to proceed with the download.
+    // The file: /usr/lib/adu/aduInstallConfirmation.txt
+    // The content: "OK" to proceed, "NG" to cancel.
+    while (true)
+    {
+        // Read content from file /usr/lib/adu/aduInstallConfirmation.txt
+        FILE* fp = fopen(fileName.c_str(), "r");
+        if (fp == NULL)
+        {
+            Log_Error("Cannot open file /usr/lib/adu/aduInstallConfirmation.txt");
+            result = { ADUC_Result_Failure_Cancelled };
+            goto done;
+        }
+        // Read the content
+        char buffer[256];
+        std::string content;
+        while (fgets(buffer, sizeof(buffer), fp) != NULL)
+        {
+            content += buffer;
+        }
+        // Close the file
+        fclose(fp);
+        Log_Info("JEISYS-DEBUG: The content of /usr/lib/adu/aduInstallConfirmation.txt is %s", content.c_str());
+        // Check content contains "OK" or "NG"
+        if (content.find("OK") != std::string::npos)
+        {
+            // Log the content
+            Log_Info("JEISYS-DEBUG: The content of /usr/lib/adu/aduInstallConfirmation.txt is OK");
+            break;
+        }
+        else if (content.find("NG") != std::string::npos)
+        {
+            // Log the content
+            Log_Info("JEISYS-DEBUG: The content of /usr/lib/adu/aduInstallConfirmation.txt is NG");
+            result = { ADUC_Result_Failure_Cancelled };
+            goto done;
+        }
+        Log_Info("JEISYS-DEBUG: Waiting for user confirmation to proceed with the download.");
+        // Sleep for 5 second
+        sleep(5);
+        iCountTime += 5;
+        if(iCountTime >= 600)
+        {
+            Log_Info("JEISYS-DEBUG: Timeout waiting for user confirmation to proceed with the download.");
+            break;
+        }
+    }
+
+    // JEISYS-CHANGE: END
     ADUC_Result result = PerformAction("--action-install", workflowData);
     return result;
 }
