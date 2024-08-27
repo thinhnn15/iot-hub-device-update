@@ -33,6 +33,7 @@
 
 #define HANDLER_PROPERTIES_SCRIPT_FILENAME "scriptFileName"
 #define HANDLER_PROPERTIES_SWU_FILENAME "swuFileName"
+#define HANDLER_STATE_FILE "/adu/handlerState.txt"
 
 namespace adushconst = Adu::Shell::Const;
 
@@ -318,6 +319,19 @@ ContentHandler* SWUpdateHandlerImpl::CreateContentHandler()
 ADUC_Result SWUpdateHandlerImpl::Download(const tagADUC_WorkflowData* workflowData)
 {
     Log_Info("SWUpdate handler v2 download task begin.");
+    // JEISYS-CHANGE: START
+    // Open HANDLER_STATE_FILE to write "DOWNLOAD" state
+    FILE* fp = fopen(HANDLER_STATE_FILE, "w");
+    if (fp == NULL)
+    {
+        Log_Error("Cannot open file %s", HANDLER_STATE_FILE);
+    }
+    else
+    {
+        fprintf(fp, "DOWNLOAD");
+        fclose(fp);
+    }
+    // JEISYS-CHANGE: END
 
     ADUC_WorkflowHandle workflowHandle = workflowData->WorkflowHandle;
     char* installedCriteria = nullptr;
@@ -467,6 +481,19 @@ done:
  */
 ADUC_Result SWUpdateHandlerImpl::Install(const tagADUC_WorkflowData* workflowData)
 {
+    // JEISYS-CHANGE: START
+    // Open HANDLER_STATE_FILE to write "INSTALL" state
+    FILE* fp = fopen(HANDLER_STATE_FILE, "w");
+    if (fp == NULL)
+    {
+        Log_Error("Cannot open file %s", HANDLER_STATE_FILE);
+    }
+    else
+    {
+        fprintf(fp, "INSALL");
+        fclose(fp);
+    }
+    // JEISYS-CHANGE: END
     // Wait for 10 minutes until user confirms to proceed with the download.
     // JEISYS-CHANGE: START
     // Write the confirmation file to user to proceed with the download.
@@ -528,6 +555,19 @@ ADUC_Result SWUpdateHandlerImpl::Install(const tagADUC_WorkflowData* workflowDat
  */
 ADUC_Result SWUpdateHandlerImpl::Apply(const tagADUC_WorkflowData* workflowData)
 {
+    // JEISYS-CHANGE: START
+    // Open HANDLER_STATE_FILE to write "APPLY" state
+    FILE* fp = fopen(HANDLER_STATE_FILE, "w");
+    if (fp == NULL)
+    {
+        Log_Error("Cannot open file %s", HANDLER_STATE_FILE);
+    }
+    else
+    {
+        fprintf(fp, "INSALL");
+        fclose(fp);
+    }
+    // JEISYS-CHANGE: END
     ADUC_Result result = { ADUC_Result_Failure };
     char* workFolder = workflow_get_workfolder(workflowData->WorkflowHandle);
     Log_Info("Applying data from %s", workFolder);
