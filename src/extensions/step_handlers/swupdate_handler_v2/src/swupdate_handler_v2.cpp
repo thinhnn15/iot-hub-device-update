@@ -328,7 +328,8 @@ ADUC_Result SWUpdateHandlerImpl::Download(const tagADUC_WorkflowData* workflowDa
     }
     else
     {
-        fprintf(fp, "DOWNLOAD");
+        // Write "0" to file
+        fprintf(fp, "0");
         fclose(fp);
     }
     // JEISYS-CHANGE: END
@@ -490,7 +491,7 @@ ADUC_Result SWUpdateHandlerImpl::Install(const tagADUC_WorkflowData* workflowDat
     }
     else
     {
-        fprintf(fp, "INSALL");
+        fprintf(fp, "1");
         fclose(fp);
     }
     // JEISYS-CHANGE: END
@@ -564,7 +565,7 @@ ADUC_Result SWUpdateHandlerImpl::Apply(const tagADUC_WorkflowData* workflowData)
     }
     else
     {
-        fprintf(fp, "INSALL");
+        fprintf(fp, "1");
         fclose(fp);
     }
     // JEISYS-CHANGE: END
